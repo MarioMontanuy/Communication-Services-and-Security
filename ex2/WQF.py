@@ -4,6 +4,7 @@ from fractions import Fraction
 parser = argparse.ArgumentParser()
 parser.add_argument('-b', '--bandwith', type=str, help='Bandwith for each flow (as a percentage)', required=True)
 parser.add_argument('-f', '--file', type=str, help='Path to the config file', required=True)
+parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mode')
 args = parser.parse_args()
 
 class Packet:
@@ -27,25 +28,32 @@ class Packet:
 
 def get_ratio(flow_percentage):
     flow_float = float(flow_percentage) / 100
-    print("Flow float: " + str(flow_float))
+    if (args.debug):
+        print("Flow float: " + str(flow_float))
     ratio = Fraction(flow_float).limit_denominator()
-    print("Ratio : " + str(ratio.numerator) + " " + str(ratio.denominator))
+    if (args.debug):
+        print("Ratio : " + str(ratio.numerator) + " " + str(ratio.denominator))
     if(ratio.numerator != 1):
         new_denominator = ratio.denominator / ratio.numerator
-        print("New denominator: " + str(new_denominator))
+        if (args.debug):
+            print("New denominator: " + str(new_denominator))
         return new_denominator
     return ratio.denominator
 
 def calculate_f_initial_packet(arrival_time, size, flow_percentage):
-    print("Arrival time: " + str(arrival_time) + " Size: " + str(size) + " Flow percentage: " + str(flow_percentage))
+    if (args.debug):
+        print("Arrival time: " + str(arrival_time) + " Size: " + str(size) + " Flow percentage: " + str(flow_percentage))
     f = float(arrival_time) + float(size) * get_ratio(flow_percentage)
-    print("F: " + str(f))
+    if (args.debug):
+        print("F: " + str(f))
     return f
 
 def calculate_f_next_packet(arrival_time, size, f, flow_percentage):
-    print("Arrival time: " + str(arrival_time) + " Size: " + str(size) + " F: " + str(f) + " Flow percentage: " + str(flow_percentage))
+    if (args.debug):
+        print("Arrival time: " + str(arrival_time) + " Size: " + str(size) + " F: " + str(f) + " Flow percentage: " + str(flow_percentage))
     f = max(float(f), float(arrival_time)) + float(size) * get_ratio(flow_percentage)
-    print("F: " + str(f))
+    if (args.debug):
+        print("F: " + str(f))
     return f
 
     
@@ -55,9 +63,7 @@ def read_file():
     return lines
 
 def get_next(queue):
-    next_packet = min(queue, key=lambda x: x.f)
-    # print(next_packet.__str__() + " is the next packet")
-    return next_packet
+    return min(queue, key=lambda x: x.f)
 
 
 def wfq(bandwith, file_data):
@@ -66,8 +72,9 @@ def wfq(bandwith, file_data):
     queue = [] 
     result = []
     for pck in file_data:
-        print("-------------------")
-        print("Packet: " + pck[0] + " " + pck[1] + " " + pck[2])
+        if (args.debug):
+            print("-------------------")
+            print("Packet: " + pck[0] + " " + pck[1] + " " + pck[2])
         # print("Current packet in transit: " + current_packet.__str__())
         # for item in queue:
         #     print(item.__str__())
@@ -75,6 +82,7 @@ def wfq(bandwith, file_data):
         if queue == []:
             # print("Queue is empty")
             packet = Packet(pck[2], pck[0], pck[1], calculate_f_initial_packet(pck[0], pck[1], bandwith[int(pck[2]) - 1]))
+            time = float(pck[0])
             queue.append(packet)
         else:
             # print("Queue is not empty")
@@ -102,21 +110,24 @@ def wfq(bandwith, file_data):
                     queue.append(packet)
     while queue != []:
         current_packet = get_next(queue)
-        time += current_packet.get_size()
         queue.remove(current_packet)
         result.append(current_packet)
-    print("Result length: " + str(len(result)))
+    if (args.debug):
+        print("Result length: " + str(len(result)))
     for item in result:
         print(item.__str__())
 
 def main():
     bandwith = args.bandwith.split(',')
-    print(bandwith)
+    if (args.debug):
+        print("Bandwith: " + str(bandwith))
     if sum(map(int, bandwith)) != 100:
-        print("The sum of the bandwidth is not 100%")
+        if (args.debug):
+            print("The sum of the bandwidth is not 100%")
         exit()       
     file_data = read_file()
-    print(file_data)
+    if (args.debug):
+        print("Data: " + str(file_data))
 
     wfq(bandwith, file_data)
 
