@@ -74,13 +74,14 @@ $ns queue-limit $n2 $n3 20
 # Node 0: UDP agent
 set udp0 [new Agent/UDP]
 $udp0 set class_ 0
-$udp0 set packetSize_ 1000
 $ns attach-agent $n0 $udp0
 
 # UDP agent: Exponential traffic generator
 set cbr0 [new Application/Traffic/Exponential]
 $cbr0 set rate_ 0.05Mbps
+$cbr0 set packetSize_ 1000
 $cbr0 attach-agent $udp0
+
 
 # Node 3: null agent for UDP
 set null0 [new Agent/Null]
