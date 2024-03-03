@@ -6,7 +6,7 @@ def parse_args():
     return parser.parse_args()
 
 def read_trace_file(trace_file):
-    with open(trace_file, "r") as file:
+    with open("../ns_simulations/" + trace_file, "r") as file:
         return file.readlines()
     
 def jacobson_karels_algorithm(rtt: float, rtt_estimated: float, deviation: float, delta1: float=1/8, delta2: float=1/4, mu: float=1, phi: float=4):
@@ -20,9 +20,9 @@ def jacobson_karels_algorithm(rtt: float, rtt_estimated: float, deviation: float
         deviation = deviation + delta2 * (abs(diff) - deviation)
     timeout = mu * rtt_estimated + phi * deviation
 
-    return rtt_estimated, deviation, timeout
+    return rtt_estimated, deviation, max(timeout, 0.2)
 
-def timeout_computation(trace):
+def timeout_and_cw_computation(trace):
     # Result
     timeouts = []
     
@@ -36,13 +36,16 @@ def timeout_computation(trace):
     rtt_seq = None
     rtt_begin_time = 0
 
+    # Slow start congestion window
+    cw = 0.0
+
     # Process tracefile
     for line in trace:
         event_type, current_time, source, destination, segment_type = line.split(' ')[:5]
         num_seq = line.split(' ')[-2]
         current_time = float(line.split(' ')[1])
         if event_type == '-' and segment_type == 'tcp' and rtt_active == 0 and source == '1' and destination == '2':
-            # print("Packet sent", line)
+            print("Packet sent", num_seq)
             # Start RTT timer
             rtt_active = 1
             rtt_seq = num_seq
@@ -52,26 +55,26 @@ def timeout_computation(trace):
             # Compute RTT and timeout applying Jacobson/Karels algorithm
             rtt_timer = current_time - rtt_begin_time
             rtt_estimated, deviation, timeout = jacobson_karels_algorithm(rtt_timer, rtt_estimated, deviation)
-            timeouts.append((current_time, rtt_timer, timeout))
+            timeouts.append((current_time, cw, rtt_timer, timeout))
             # Stop RTT timer
             rtt_active = 0
 
-        if (current_time - rtt_begin_time) >= (timeout - 0.01):
+        if (current_time - rtt_begin_time) > timeout:
             # Timeout occurred
             rtt_active = 0
-            print("Timeout occured")
+            # print("Timeout occured: ", rtt_seq)
 
     return timeouts
             
 def write_results(timeouts):
     with open("timeouts.tcp_rfc793", "w") as file:
-        for now, rtt, timeout in timeouts:
-            file.write(f"{now} {rtt} {timeout}\n")
+        for now, cw, rtt, timeout in timeouts:
+            file.write(f"{now} {cw} {rtt} {timeout}\n")
         
 
 if __name__ == "__main__":
     args = parse_args()
     trace = read_trace_file(args.trace_file)
-    timeouts = timeout_computation(trace)
+    timeouts = timeout_and_cw_computation(trace)
     write_results(timeouts)
 
