@@ -38,20 +38,21 @@ def timeout_computation(trace):
 
     # Process tracefile
     for line in trace:
-        event_type, current_time, _, _, segment_type = line.split(' ')[:5]
+        event_type, current_time, source, destination, segment_type = line.split(' ')[:5]
         num_seq = line.split(' ')[-2]
         current_time = float(line.split(' ')[1])
-        if event_type == '-' and segment_type == 'tcp' and rtt_active == 0:
+        if event_type == '-' and segment_type == 'tcp' and rtt_active == 0 and source == '1' and destination == '2':
             # print("Packet sent", line)
             # Start RTT timer
             rtt_active = 1
             rtt_seq = num_seq
             rtt_begin_time = current_time
-        if event_type == 'r' and segment_type == 'ack' and rtt_active == 1 and num_seq == rtt_seq:
+        if event_type == 'r' and segment_type == 'ack' and rtt_active == 1 and num_seq == rtt_seq and source == '2' and destination == '1':
             # print("Packet acked", line)
             # Compute RTT and timeout applying Jacobson/Karels algorithm
-            rtt_estimated, deviation, timeout = jacobson_karels_algorithm(current_time - rtt_begin_time, rtt_estimated, deviation)
-            timeouts.append((current_time, timeout))
+            rtt_timer = current_time - rtt_begin_time
+            rtt_estimated, deviation, timeout = jacobson_karels_algorithm(rtt_timer, rtt_estimated, deviation)
+            timeouts.append((current_time, rtt_timer, timeout))
             # Stop RTT timer
             rtt_active = 0
 
@@ -64,8 +65,8 @@ def timeout_computation(trace):
             
 def write_results(timeouts):
     with open("timeouts.tcp_rfc793", "w") as file:
-        for now, timeout in timeouts:
-            file.write(f"{now} {timeout}\n")
+        for now, rtt, timeout in timeouts:
+            file.write(f"{now} {rtt} {timeout}\n")
         
 
 if __name__ == "__main__":
