@@ -41,9 +41,10 @@ proc record { } {
 	global ns tcp1 nff
 	# Getting the congestion window
     set cw  [$tcp1 set cwnd_] 
+    set rtt  [expr [$tcp1 set rtt_]  * [$tcp1 set tcpTick_]]
     set rto [expr [$tcp1 set rto_] * [$tcp1 set tcpTick_]]
 	set now [$ns now]
-	puts $nff "$now $cw $rto"
+	puts $nff "$now $cw $rtt $rto"
 
 	$ns at [expr $now+0.1] "record"
 }
