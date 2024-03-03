@@ -10,9 +10,14 @@ def read_trace_file(trace_file):
         return file.readlines()
     
 def jacobson_karels_algorithm(rtt: float, rtt_estimated: float, deviation: float, delta1: float=1/8, delta2: float=1/4, mu: float=1, phi: float=4):
-    diff = rtt - rtt_estimated
-    rtt_estimated = rtt_estimated + delta1 * diff
-    deviation = deviation + delta2 * (abs(diff) - deviation)
+    if rtt_estimated is None:
+        # Fist RTT
+        rtt_estimated = rtt
+        deviation = rtt / 2
+    else:
+        diff = rtt - rtt_estimated
+        rtt_estimated = rtt_estimated + delta1 * diff
+        deviation = deviation + delta2 * (abs(diff) - deviation)
     timeout = mu * rtt_estimated + phi * deviation
 
     return rtt_estimated, deviation, timeout
@@ -37,19 +42,15 @@ def timeout_computation(trace):
         num_seq = line.split(' ')[-2]
         current_time = float(line.split(' ')[1])
         if event_type == '-' and segment_type == 'tcp' and rtt_active == 0:
-            print("Packet sent", line)
+            # print("Packet sent", line)
             # Start RTT timer
             rtt_active = 1
             rtt_seq = num_seq
             rtt_begin_time = current_time
         if event_type == 'r' and segment_type == 'ack' and rtt_active == 1 and num_seq == rtt_seq:
-            print("Packet acked", line)
+            # print("Packet acked", line)
             # Compute RTT and timeout applying Jacobson/Karels algorithm
-            if rtt_estimated is None:
-                rtt_estimated = current_time - rtt_begin_time
-                deviation = rtt_estimated / 2
-            else:
-                rtt_estimated, deviation, timeout = jacobson_karels_algorithm(current_time - rtt_begin_time, rtt_estimated, deviation)
+            rtt_estimated, deviation, timeout = jacobson_karels_algorithm(current_time - rtt_begin_time, rtt_estimated, deviation)
             timeouts.append((current_time, timeout))
             # Stop RTT timer
             rtt_active = 0
