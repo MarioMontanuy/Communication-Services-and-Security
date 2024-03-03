@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 agent_config = {
     "tcp_rfc793": {
         "computed_results": "timeouts.tcp_rfc793",
-        "ns_results": "../ns_simulations/cw.tcp_rfc_ss",
+        "ns_results": "../ns_simulations/rfc793/cw.tcp_rfc_ss",
     }
 }
 
