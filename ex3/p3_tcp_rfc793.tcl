@@ -41,8 +41,9 @@ proc record { } {
 	global ns tcp1 nff
 	# Getting the congestion window
     set cw  [$tcp1 set cwnd_] 
+    set rto [expr [$tcp1 set rto_] * [$tcp1 set tcpTick_]]
 	set now [$ns now]
-	puts $nff "$now $cw"
+	puts $nff "$now $cw $rto"
 
 	$ns at [expr $now+0.1] "record"
 }
@@ -97,6 +98,8 @@ $ns at 180.0 "$cbr0 stop"
 # Node 1: RFC793 with slow start
 set tcp1 [new Agent/TCP/RFC793edu]
 $tcp1 set class_ 1
+$tcp1 set add793karnrtt_ false
+$tcp1 set add793expbackoff_ false
 $tcp1 set add793jacobsonrtt_ true
 $tcp1 set add793slowstart_ true
 $ns attach-agent $n1 $tcp1
