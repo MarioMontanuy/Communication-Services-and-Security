@@ -1,12 +1,8 @@
 from argparse import ArgumentParser
-
-def parse_args():
-    parser = ArgumentParser()
-    parser.add_argument("trace_file")
-    return parser.parse_args()
+import utils
 
 def read_trace_file(trace_file):
-    with open("../ns_simulations/" + trace_file, "r") as file:
+    with open(trace_file, "r") as file:
         return file.readlines()
     
 def jacobson_karels_algorithm(rtt: float, rtt_estimated: float, deviation: float, delta1: float=1/8, delta2: float=1/4, mu: float=1, phi: float=4):
@@ -22,7 +18,7 @@ def jacobson_karels_algorithm(rtt: float, rtt_estimated: float, deviation: float
 
     return rtt_estimated, deviation, max(timeout, 0.2)
 
-def timeout_and_cw_computation(trace):
+def timeout_and_cw_computation(trace, CWMAX=10):
     # Result
     timeouts = []
     
@@ -37,7 +33,14 @@ def timeout_and_cw_computation(trace):
     rtt_begin_time = 0
 
     # Slow start congestion window
-    cw = 0.0
+    cwini = 1.0
+    cwnd = cwini
+    cmax = CWMAX
+    acked_segments = []
+    lost_segments = []
+
+    # TODO: borrar rtt
+    rtt_timer = -1
 
     # Process tracefile
     for line in trace:
@@ -45,24 +48,43 @@ def timeout_and_cw_computation(trace):
         num_seq = line.split(' ')[-2]
         current_time = float(line.split(' ')[1])
         if event_type == '-' and segment_type == 'tcp' and rtt_active == 0 and source == '1' and destination == '2':
-            print("Packet sent", num_seq)
+            # print("Packet sent", num_seq)
             # Start RTT timer
             rtt_active = 1
             rtt_seq = num_seq
             rtt_begin_time = current_time
-        if event_type == 'r' and segment_type == 'ack' and rtt_active == 1 and num_seq == rtt_seq and source == '2' and destination == '1':
-            # print("Packet acked", line)
-            # Compute RTT and timeout applying Jacobson/Karels algorithm
-            rtt_timer = current_time - rtt_begin_time
-            rtt_estimated, deviation, timeout = jacobson_karels_algorithm(rtt_timer, rtt_estimated, deviation)
-            timeouts.append((current_time, cw, rtt_timer, timeout))
-            # Stop RTT timer
-            rtt_active = 0
+        if event_type == 'r' and segment_type == 'ack' and source == '2' and destination == '1':
+            if num_seq == rtt_seq and rtt_active == 1:
+                # Compute RTT and timeout applying Jacobson/Karels algorithm
+                rtt_timer = current_time - rtt_begin_time
+                rtt_estimated, deviation, timeout = jacobson_karels_algorithm(rtt_timer, rtt_estimated, deviation)
+                # Stop RTT timer
+                rtt_active = 0
+                timeouts.append((current_time, cwnd, rtt_timer, timeout))
+            if num_seq not in acked_segments:
+                acked_segments.append(num_seq)
+                # Update congestion window
+                if cwnd < cmax:
+                    # exponential increase
+                    cwnd += 1
+                else:
+                    # linear increase
+                    cwnd += 1/cwnd
+                    cmax = min(cwnd, CWMAX)
+
 
         if (current_time - rtt_begin_time) > timeout:
-            # Timeout occurred
-            rtt_active = 0
-            # print("Timeout occured: ", rtt_seq)
+            if rtt_seq not in lost_segments:
+                # Timeout occurred
+                rtt_active = 0
+                cwnd = cwini
+                cmax = int(max(cwini, cmax/2))
+                print(f"Timeout occured at time {current_time} with sequence number {rtt_seq}")
+            lost_segments.append(rtt_seq)
+            
+        
+        # Add line in result
+        # timeouts.append((current_time, cwnd, rtt_timer, timeout))
 
     return timeouts
             
@@ -73,8 +95,8 @@ def write_results(timeouts):
         
 
 if __name__ == "__main__":
-    args = parse_args()
-    trace = read_trace_file(args.trace_file)
+    args = utils.parse_args()
+    trace = read_trace_file(utils.get_agent_ns_trace(args.agent))
     timeouts = timeout_and_cw_computation(trace)
     write_results(timeouts)
 
