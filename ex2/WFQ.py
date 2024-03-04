@@ -83,32 +83,44 @@ def wfq(bandwith, file_data):
         #     print(item.__str__())
         # Start
         if queue == []:
-            # print("Queue is empty")
+            if (args.debug):
+                print("Queue is empty")
             packet = Packet(pck_id, pck[2], pck[0], pck[1], calculate_f_initial_packet(pck[0], pck[1], bandwith[int(pck[2]) - 1]))
             time = float(pck[0])
             queue.append(packet)
         else:
-            # print("Queue is not empty")
+            if (args.debug):
+                print("Queue is not empty")
             if queue[0].arrival_time == pck[0]:
-                # print("Same arrival time")
+                if (args.debug):
+                    print("Same arrival time")
                 packet = Packet(pck_id, pck[2], pck[0], pck[1], calculate_f_initial_packet(pck[0], pck[1], bandwith[int(pck[2]) - 1])) 
                 queue.append(packet)
             else:
-                # print("Different arrival time")
-                current_packet = get_next(queue)
-                time += current_packet.get_size()
-                queue.remove(current_packet)
-                result.append(current_packet)
+                if (args.debug):
+                    print("Different arrival time")
+                # current_packet = get_next(queue)
+                # time += current_packet.get_size()
+                # queue.remove(current_packet)
+                # result.append(current_packet)
+                
                 # Next
                 if(float(pck[0]) <= time):
-                    # print("Packet is less than f")
+                    if (args.debug):
+                        print("Packet is less than time")
                     packet = Packet(pck_id, pck[2], pck[0], pck[1], calculate_f_next_packet(pck[0], pck[1], current_packet.f, bandwith[int(pck[2]) - 1]))
                     queue.append(packet)
                 else:
-                    # print("Packet is greater than f")
+                    if (args.debug):
+                        print("Packet is greater than time")
                     # queue.remove(current_packet)
                     current_packet = get_next(queue)
                     time += current_packet.get_size()
+                    queue.remove(current_packet)
+                    result.append(current_packet)
+                    if (args.debug):
+                        print("time: " + str(time))
+                        print("Current packet in transit: " + current_packet.__str__())
                     packet = Packet(pck_id, pck[2], pck[0], pck[1], calculate_f_next_packet(pck[0], pck[1], current_packet.f, bandwith[int(pck[2]) - 1]))
                     queue.append(packet)
     while queue != []:
