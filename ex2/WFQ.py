@@ -8,7 +8,12 @@ parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mod
 args = parser.parse_args()
 
 class Packet:
+<<<<<<< Updated upstream
     def __init__(self, flow_id ,arrival_time, size, f):
+=======
+    def __init__(self, pck_id, flow_id ,arrival_time, size, f):
+        self.pck_id = pck_id
+>>>>>>> Stashed changes
         self.flow_id = flow_id
         self.arrival_time = arrival_time
         self.size = size
@@ -72,6 +77,10 @@ def wfq(bandwith, file_data):
     queue = [] 
     result = []
     for pck in file_data:
+<<<<<<< Updated upstream
+=======
+        pck_id += 1
+>>>>>>> Stashed changes
         if (args.debug):
             print("-------------------")
             print("Packet: " + pck[0] + " " + pck[1] + " " + pck[2])
