@@ -23,7 +23,7 @@ def plot_timeouts(computed_timeouts, ns_timeouts):
 
     # Plot timeouts using matplotlib
     plt.plot(ns_times, ns_timeouts, label="NS")
-    plt.plot(computed_times, computed_timeouts, label="Computed", color="red")
+    plt.scatter(computed_times, computed_timeouts, label="Computed", color="red")
     plt.xlabel("Time")
     plt.ylabel("Timeout")
     plt.title("Timeouts")
