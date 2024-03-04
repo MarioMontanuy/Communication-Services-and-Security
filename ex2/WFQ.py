@@ -8,12 +8,8 @@ parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mod
 args = parser.parse_args()
 
 class Packet:
-<<<<<<< Updated upstream
-    def __init__(self, flow_id ,arrival_time, size, f):
-=======
     def __init__(self, pck_id, flow_id ,arrival_time, size, f):
         self.pck_id = pck_id
->>>>>>> Stashed changes
         self.flow_id = flow_id
         self.arrival_time = arrival_time
         self.size = size
@@ -29,7 +25,7 @@ class Packet:
         return float(self.f)
 
     def __str__(self):
-        return f"Packet from flow {self.flow_id} with arrival time {self.arrival_time} and size {self.size} and f {self.f}"
+        return f"Packet with id {self.pck_id} from flow {self.flow_id} with arrival time {self.arrival_time} and size {self.size} and f {self.f}"
 
 def get_ratio(flow_percentage):
     flow_float = float(flow_percentage) / 100
@@ -72,15 +68,13 @@ def get_next(queue):
 
 
 def wfq(bandwith, file_data):
-    current_packet = Packet(0, 0, 0, 0)
+    current_packet = Packet(0, 0, 0, 0, 0)
+    pck_id = 0
     time = 0.0
     queue = [] 
     result = []
     for pck in file_data:
-<<<<<<< Updated upstream
-=======
         pck_id += 1
->>>>>>> Stashed changes
         if (args.debug):
             print("-------------------")
             print("Packet: " + pck[0] + " " + pck[1] + " " + pck[2])
@@ -90,14 +84,14 @@ def wfq(bandwith, file_data):
         # Start
         if queue == []:
             # print("Queue is empty")
-            packet = Packet(pck[2], pck[0], pck[1], calculate_f_initial_packet(pck[0], pck[1], bandwith[int(pck[2]) - 1]))
+            packet = Packet(pck_id, pck[2], pck[0], pck[1], calculate_f_initial_packet(pck[0], pck[1], bandwith[int(pck[2]) - 1]))
             time = float(pck[0])
             queue.append(packet)
         else:
             # print("Queue is not empty")
             if queue[0].arrival_time == pck[0]:
                 # print("Same arrival time")
-                packet = Packet(pck[2], pck[0], pck[1], calculate_f_initial_packet(pck[0], pck[1], bandwith[int(pck[2]) - 1])) 
+                packet = Packet(pck_id, pck[2], pck[0], pck[1], calculate_f_initial_packet(pck[0], pck[1], bandwith[int(pck[2]) - 1])) 
                 queue.append(packet)
             else:
                 # print("Different arrival time")
@@ -108,14 +102,14 @@ def wfq(bandwith, file_data):
                 # Next
                 if(float(pck[0]) <= time):
                     # print("Packet is less than f")
-                    packet = Packet(pck[2], pck[0], pck[1], calculate_f_next_packet(pck[0], pck[1], current_packet.f, bandwith[int(pck[2]) - 1]))
+                    packet = Packet(pck_id, pck[2], pck[0], pck[1], calculate_f_next_packet(pck[0], pck[1], current_packet.f, bandwith[int(pck[2]) - 1]))
                     queue.append(packet)
                 else:
                     # print("Packet is greater than f")
                     # queue.remove(current_packet)
                     current_packet = get_next(queue)
                     time += current_packet.get_size()
-                    packet = Packet(pck[2], pck[0], pck[1], calculate_f_next_packet(pck[0], pck[1], current_packet.f, bandwith[int(pck[2]) - 1]))
+                    packet = Packet(pck_id, pck[2], pck[0], pck[1], calculate_f_next_packet(pck[0], pck[1], current_packet.f, bandwith[int(pck[2]) - 1]))
                     queue.append(packet)
     while queue != []:
         current_packet = get_next(queue)
