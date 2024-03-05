@@ -23,10 +23,23 @@ def plot_timeouts(computed_timeouts, ns_timeouts):
 
     # Plot timeouts using matplotlib
     plt.plot(ns_times, ns_timeouts, label="NS")
-    plt.scatter(computed_times, computed_timeouts, label="Computed", color="red")
+    plt.plot(computed_times, computed_timeouts, label="Computed", color="red")
     plt.xlabel("Time")
     plt.ylabel("Timeout")
     plt.title("Timeouts")
+    plt.legend()
+    plt.show()
+
+def plot_cw(computed_cw, ns_cw):
+    computed_times, computed_cw = zip(*computed_cw)
+    ns_times, ns_cw = zip(*ns_cw)
+
+    # Plot timeouts using matplotlib
+    plt.plot(ns_times, ns_cw, label="NS")
+    plt.plot(computed_times, computed_cw, label="Computed", color="red")
+    plt.xlabel("Time")
+    plt.ylabel("Congestion Window")
+    plt.title("Congestion Window")
     plt.legend()
     plt.show()
 
@@ -40,3 +53,6 @@ if __name__ == "__main__":
 
     # Plot timeouts
     plot_timeouts(computed_timeouts, ns_timeouts)
+
+    # Plot congestion window
+    # plot_cw(computed_cw, ns_cw)

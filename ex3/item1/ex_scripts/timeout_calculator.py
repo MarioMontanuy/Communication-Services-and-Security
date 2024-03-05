@@ -36,13 +36,14 @@ def timeout_and_cw_computation(trace, CWMAX=10):
     cwini = 1.0
     cwnd = cwini
     cmax = CWMAX
+    sent_segments = []
     lost_segments = []
-    # Save highest sent sequence number
+    acked_segments = []
     highest_seq_sent = -1
 
     # TODO: borrar rtt
     rtt_timer = -1
-    timeout_recovery = False
+    timeout_timer_begin_time = 3
 
     # Process tracefile
     for line in trace:
@@ -52,21 +53,16 @@ def timeout_and_cw_computation(trace, CWMAX=10):
         if event_type == '-' and segment_type == 'tcp' and source == '1' and destination == '2':
             # print("Packet sent", num_seq)
             highest_seq_sent = max(highest_seq_sent, int(num_seq))
+            
             # Start RTT timer
-            # if int(rtt_seq) >= int(highest_seq_sent) and rtt_active == 0:
-            if rtt_active == 0:
-                # if timeout_recovery:
-                #     print("Sequence number", rtt_seq, "is in timeout recovery with highest sequence number", highest_seq_sent)
-                if int(num_seq) >= int(highest_seq_sent):
-                    rtt_active = 1
-                    rtt_seq = num_seq
-                    rtt_begin_time = current_time
-                    timeout_recovery = False
-                # else:
-                #     rtt_active = 1
-                #     rtt_seq = num_seq
-                #     rtt_begin_time = current_time
-                #     timeout_recovery = False
+            if rtt_active == 0 and int(num_seq) not in sent_segments:
+                print(f"Starting RTT timer for sequence number {num_seq}")
+
+                rtt_active = 1
+                rtt_seq = num_seq
+                rtt_begin_time = current_time
+            
+            sent_segments.append(int(num_seq))
 
         if event_type == 'r' and segment_type == 'ack' and source == '2' and destination == '1':
             if num_seq == rtt_seq and rtt_active == 1:
@@ -75,32 +71,34 @@ def timeout_and_cw_computation(trace, CWMAX=10):
                 rtt_estimated, deviation, timeout = jacobson_karels_algorithm(rtt_timer, rtt_estimated, deviation)
                 # Stop RTT timer
                 rtt_active = 0
-                timeouts.append((current_time, cwnd, rtt_timer, timeout))
-            # if num_seq not in acked_segments:
-                # acked_segments.append(num_seq)
-            # Update congestion window
-            if cwnd < cmax:
-                # exponential increase
-                cwnd += 1
-            else:
-                # linear increase
-                cwnd += 1/cwnd
-                cmax = min(cwnd, CWMAX)
+                # timeouts.append((current_time, cwnd, rtt_timer, timeout))
+            
+            if int(num_seq) not in acked_segments:
+                timeout_timer_begin_time = current_time
+                acked_segments.append(int(num_seq))
+                # Update congestion window
+                if cwnd < cmax:
+                    # exponential increase
+                    cwnd += 1
+                else:
+                    # linear increase
+                    cwnd += 1/cwnd
+                    cmax = min(cwnd, CWMAX)
 
 
-        if (current_time - rtt_begin_time) > timeout:
+        if (current_time - timeout_timer_begin_time) > (timeout + 0.02):
             # Timeout occurred
             rtt_active = 0
-            timeout_recovery = True
             if rtt_seq not in lost_segments:
                 cwnd = cwini
                 cmax = int(max(cwini, cmax/2))
                 lost_segments.append(rtt_seq)
+                acked_segments = []
             # print(f"Timeout occured at time {current_time} with sequence number {rtt_seq}")
             
         
         # Add line in result
-        # timeouts.append((current_time, cwnd, rtt_timer, timeout))
+        timeouts.append((current_time, cwnd, rtt_timer, timeout))
 
     return timeouts
             
