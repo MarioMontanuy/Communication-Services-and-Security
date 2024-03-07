@@ -123,9 +123,9 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
     sent_segments = []
     lost_segments = []
     acked_segments = []
+    duplicated_segments = []
     last_acked = -1
     times_last_acked = 0
-    highest_seq_sent = -1
 
     # TODO: borrar rtt
     rtt_timer = -1
@@ -133,6 +133,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
 
     # Reno
     fast_recovery_phase = False
+    fast_recovery_segment = -1
 
     # Process tracefile
     for line in trace:
@@ -141,12 +142,14 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
         current_time = float(line.split(' ')[1])
         if event_type == '-' and segment_type == 'tcp' and source == '1' and destination == '2':
             # print("Packet sent", num_seq)
-            highest_seq_sent = max(highest_seq_sent, int(num_seq))
+            if num_seq == '158':
+                print(rtt_active)
+                print(rtt_seq)
+                print(int(num_seq) not in sent_segments)
             
             # Start RTT timer
             if rtt_active == 0 and int(num_seq) not in sent_segments:
-                print(f"Starting RTT timer for sequence number {num_seq}")
-
+                # print(f"Starting RTT timer for sequence number {num_seq}")
                 rtt_active = 1
                 rtt_seq = num_seq
                 rtt_begin_time = current_time
@@ -165,14 +168,17 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
             if int(num_seq) not in acked_segments:
                 timeout_timer_begin_time = current_time
                 acked_segments.append(int(num_seq))
-                # Update congestion window
-                if cwnd < cmax and not fast_recovery_phase:
-                    # exponential increase
-                    cwnd += 1
-                else:
-                    # linear increase
-                    cwnd += 1/cwnd
-                    cmax = min(cwnd, CWMAX)
+                if int(num_seq) >= fast_recovery_segment:
+                    fast_recovery_phase = False
+                if int(num_seq) not in duplicated_segments:
+                    # Update congestion window
+                    if cwnd < cmax and not fast_recovery_phase:
+                        # exponential increase
+                        cwnd += 1
+                    else:
+                        # linear increase
+                        cwnd += 1/cwnd
+                        cmax = min(cwnd, CWMAX)
 
             # Reno
             if int(num_seq) != last_acked:
@@ -182,7 +188,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
                 times_last_acked += 1
 
 
-        if (current_time - timeout_timer_begin_time) > (timeout + 0.02):
+        if (current_time - timeout_timer_begin_time) > (timeout + 0.015):
             # Timeout occurred
             rtt_active = 0
             fast_recovery_phase = False
@@ -194,12 +200,17 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
                 acked_segments = []
             # print(f"Timeout occured at time {current_time} with sequence number {rtt_seq}")
                 
-        if times_last_acked == 3:
+        if times_last_acked == 4 and not fast_recovery_phase:
+            print("Received 3rd duplicate ACK for sequence number", last_acked)
+            print("current RTT packet", rtt_seq)
+            rtt_active = 0
             cwnd = min(cwnd/2, CWMAX/2)
             cmax = int(max(cwini, cmax/2))
             times_last_acked = 0
             fast_recovery_phase = True
+            fast_recovery_segment = sent_segments[-1]
             acked_segments = []
+            duplicated_segments.append(last_acked)
             
         
         # Add line in result
@@ -217,6 +228,9 @@ def write_results(timeouts, agent):
 if __name__ == "__main__":
     args = utils.parse_args()
     trace = read_trace_file(utils.get_agent_ns_trace(args.agent))
-    timeouts = timeout_and_cw_computation(trace)
+    if args.agent == "tcp_rfc793":
+        timeouts = timeout_and_cw_computation(trace)
+    elif args.agent == "reno":
+        timeouts = timeout_and_cw_computation_reno(trace)
     write_results(timeouts, args.agent)
 
