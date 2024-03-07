@@ -76,12 +76,13 @@ $ns duplex-link $n2 $n3 0.05Mb 500ms RED
 set red_queue [[$ns link $n2 $n3] queue]
 
 $red_queue set bytes_ false
-$red_queue set queu-in-bytes_ false
+$red_queue set queue-in-bytes_ false
 $red_queue set thresh_ 10
 $red_queue set maxthresh_ 20
 # $red_queue set q_weight_ 0.5
 $red_queue set wait_ true
 # $red_queue set linterm_ 50
+$red_queue set limit_ 20
 # --------- Item 6 ----------
 
 # Set node 2 buffer size
@@ -110,13 +111,9 @@ $ns connect $udp0 $null0
 $ns at 20.0 "$cbr0 start"
 $ns at 180.0 "$cbr0 stop"
 
-# Node 1: RFC793 with slow start
+# Node 1: Reno
 set tcp1 [new Agent/TCP/Reno]
 $tcp1 set class_ 1
-$tcp1 set add793karnrtt_ true
-$tcp1 set add793expbackoff_ false
-$tcp1 set add793jacobsonrtt_ true
-$tcp1 set add793slowstart_ false
 $ns attach-agent $n1 $tcp1
 $tcp1 set tcpTick_ 0.01
 $tcp1 set window_ 10

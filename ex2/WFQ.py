@@ -99,12 +99,6 @@ def wfq(bandwith, file_data):
             else:
                 if (args.debug):
                     print("Different arrival time")
-                # current_packet = get_next(queue)
-                # time += current_packet.get_size()
-                # queue.remove(current_packet)
-                # result.append(current_packet)
-                
-                # Next
                 if(float(pck[0]) <= time):
                     if (args.debug):
                         print("Packet is less than time")
