@@ -17,8 +17,8 @@ try:
                             pck_list.append(x[10])
                             sum_bytes += int(x[5])
         print("Total throughput: " + str(sum_bytes) + " bytes")
-        print("Average throughput per second: " + str(sum_bytes // 200) + " bytes/sec")        
-        print("Number of packets: " + str(len(pck_list)))
+        print("Throughput per second: " + str(sum_bytes // 200) + " bytes/sec")        
+        print("Total number of packets: " + str(len(pck_list)))
 except FileNotFoundError:
     print(f"Can't open {infile}")
 
