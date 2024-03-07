@@ -3,7 +3,6 @@ import sys
 # type: python throughput.py <trace file> <required node> <granularity>   >    output file
 
 infile = sys.argv[1]
-tonode = sys.argv[2]
 
 sum_bytes = 0
 pck_list = []
@@ -11,8 +10,8 @@ try:
     with open(infile, 'r') as data:
         for line in data:
             x = line.split()
-            if x[0] == 'r':
-                if x[3] == tonode:
+            if x[0] == '-':
+                if x[2] == '1':
                     if x[4] == 'tcp':
                         if (pck_list.__contains__(x[10]) == False):
                             pck_list.append(x[10])
