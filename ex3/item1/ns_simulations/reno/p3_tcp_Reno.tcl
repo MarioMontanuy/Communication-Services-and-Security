@@ -81,7 +81,6 @@ $ns attach-agent $n0 $udp0
 # UDP agent: Exponential traffic generator
 set cbr0 [new Application/Traffic/Exponential]
 $cbr0 set rate_ 0.05Mbps
-$cbr0 set packetSize_ 1000
 $cbr0 attach-agent $udp0
 
 
@@ -99,10 +98,6 @@ $ns at 180.0 "$cbr0 stop"
 # Node 1: RFC793 with slow start
 set tcp1 [new Agent/TCP/Reno]
 $tcp1 set class_ 1
-$tcp1 set add793karnrtt_ false
-$tcp1 set add793expbackoff_ false
-$tcp1 set add793jacobsonrtt_ true
-$tcp1 set add793slowstart_ false
 $ns attach-agent $n1 $tcp1
 $tcp1 set tcpTick_ 0.01
 $tcp1 set window_ 10
