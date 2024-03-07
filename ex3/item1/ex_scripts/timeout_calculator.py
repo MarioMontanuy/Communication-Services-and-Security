@@ -140,16 +140,10 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
         event_type, current_time, source, destination, segment_type = line.split(' ')[:5]
         num_seq = line.split(' ')[-2]
         current_time = float(line.split(' ')[1])
-        if event_type == '-' and segment_type == 'tcp' and source == '1' and destination == '2':
-            # print("Packet sent", num_seq)
-            if num_seq == '158':
-                print(rtt_active)
-                print(rtt_seq)
-                print(int(num_seq) not in sent_segments)
-            
+        if event_type == '-' and segment_type == 'tcp' and source == '1' and destination == '2':           
             # Start RTT timer
             if rtt_active == 0 and int(num_seq) not in sent_segments:
-                # print(f"Starting RTT timer for sequence number {num_seq}")
+                print(f"{num_seq}")
                 rtt_active = 1
                 rtt_seq = num_seq
                 rtt_begin_time = current_time
@@ -201,8 +195,8 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
             # print(f"Timeout occured at time {current_time} with sequence number {rtt_seq}")
                 
         if times_last_acked == 4 and not fast_recovery_phase:
-            print("Received 3rd duplicate ACK for sequence number", last_acked)
-            print("current RTT packet", rtt_seq)
+            # print("Received 3rd duplicate ACK for sequence number", last_acked)
+            # print("current RTT packet", rtt_seq)
             rtt_active = 0
             cwnd = min(cwnd/2, CWMAX/2)
             cmax = int(max(cwini, cmax/2))
