@@ -76,5 +76,5 @@ make get_reno_wait_false_throughput
 
 In order to compare the congestion window of TCP reno with and without RED, we have generated a plot by running:
 ````
-plot_tcp_red_comparisons
+make plot_tcp_red_comparisons
 ````
