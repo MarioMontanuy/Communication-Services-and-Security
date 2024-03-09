@@ -143,7 +143,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
         if event_type == '-' and segment_type == 'tcp' and source == '1' and destination == '2':           
             # Start RTT timer
             if rtt_active == 0 and int(num_seq) not in sent_segments:
-                print(f"{num_seq}")
+                print(f"{current_time}: Packet sent {num_seq}")
                 rtt_active = 1
                 rtt_seq = num_seq
                 rtt_begin_time = current_time
@@ -152,6 +152,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
 
         if event_type == 'r' and segment_type == 'ack' and source == '2' and destination == '1':
             if num_seq == rtt_seq and rtt_active == 1:
+                print(f"{num_seq}")
                 # Compute RTT and timeout applying Jacobson/Karels algorithm
                 rtt_timer = current_time - rtt_begin_time
                 rtt_estimated, deviation, timeout = jacobson_karels_algorithm(rtt_timer, rtt_estimated, deviation)
@@ -192,7 +193,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
                 timeout = 2 * timeout
                 lost_segments.append(rtt_seq)
                 acked_segments = []
-            # print(f"Timeout occured at time {current_time} with sequence number {rtt_seq}")
+            print(f"{current_time}:Timeout occured with sequence number {rtt_seq}")
                 
         if times_last_acked == 4 and not fast_recovery_phase:
             # print("Received 3rd duplicate ACK for sequence number", last_acked)
@@ -205,6 +206,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
             fast_recovery_segment = sent_segments[-1]
             acked_segments = []
             duplicated_segments.append(last_acked)
+            timeout_timer_begin_time = current_time
             
         
         # Add line in result
