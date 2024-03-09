@@ -3,33 +3,31 @@ from argparse import ArgumentParser
 
 agent_config = {
     "tcp_rfc793": {
-        "trace_file": "ns_simulations/rfc793/sor.tcp_rfc_ss",
-        "computed_results": "agent_results/results.tcp_rfc793",
-        "ns_results": "ns_simulations/rfc793/cw.tcp_rfc_ss",
+        "trace_file": "ex3/item1/ns_simulations/rfc793/sor.tcp_rfc_ss",
+        "computed_results": "ex3/item1/agent_results/results.tcp_rfc793",
+        "ns_results": "ex3/item1/ns_simulations/rfc793/cw.tcp_rfc_ss",
     },
     "reno": { 
-        "trace_file": "ns_simulations/reno/sor.tcp_reno_ss",
-        "computed_results": "agent_results/results.tcp_reno",
-        "ns_cw_results": "ns_simulations/reno/cw.tcp_reno_ss",
-        "ns_rto_results": "ns_simulations/reno/rto.tcp_reno_ss",
+        "trace_file": "ex3/item1/ns_simulations/reno/sor.tcp_reno_ss",
+        "computed_results": "ex3/item1/agent_results/results.tcp_reno",
+        "ns_cw_results": "ex3/item1/ns_simulations/reno/cw.tcp_reno_ss",
+        "ns_rto_results": "ex3/item1/ns_simulations/reno/rto.tcp_reno_ss",
     },
     "reno+red+wait_false": {
-        "ns_cw_results": "../../item6/wait_false/cw.tcp_Reno_item6_ss",
+        "ns_cw_results": "ex3/item6/wait_false/cw.tcp_Reno_item6_ss",
     },
     "reno+red+wait_true": {
-        "ns_cw_results": "../../item6/wait_true/cw.tcp_Reno_item6_ss",
+        "ns_cw_results": "ex3/item6/wait_true/cw.tcp_Reno_item6_ss",
     },
     "newreno": {
-        "ns_cw_results": "../../item4/newreno/cw.tcp_Newreno_ss",
-    },
-    "reno_comparison": {
-        "ns_cw_results": "../../item5/cw.tcp_Reno_item5_ss",
+        "ns_cw_results": ".ex3/item4/newreno/cw.tcp_Newreno_ss",
     },
 }
 
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument("agent", choices=agent_config.keys(), default="tcp_rfc793", nargs='?', help="Agent to plot results")
+    parser.add_argument("--d", action="store_true", help="Debug mode")
     return parser.parse_args()
 
 def get_agent_ns_trace(agent):

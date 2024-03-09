@@ -2,8 +2,8 @@ from agents.tcp_rfc793_agent import TCPAgent
 from agents.utils.cw_calculator import RenoCWCalculator
 
 class TCPRenoAgent(TCPAgent):
-    def __init__(self, trace_file: str, CWMAX: int=10, rtt_algorithm: str = "jacobson_rtt"):
-        super().__init__(trace_file, CWMAX, rtt_algorithm)
+    def __init__(self, trace_file: str, CWMAX: int=10, rtt_algorithm: str = "jacobson_rtt", debug: bool = False):
+        super().__init__(trace_file, CWMAX, rtt_algorithm, debug)
         self.cw_calculator = RenoCWCalculator(CWMAX)
         
         # Reno specific
@@ -11,7 +11,7 @@ class TCPRenoAgent(TCPAgent):
         self.times_last_acked = 0
         
         # Results
-        self.results_file = "agent_results/results.tcp_reno"
+        self.results_file = "ex3/item1/agent_results/results.tcp_reno"
         
     def process_acked_segment(self, num_seq: int, current_time: float):
         super().process_acked_segment(num_seq, current_time)

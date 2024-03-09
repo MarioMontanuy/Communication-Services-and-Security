@@ -4,9 +4,10 @@ from agents.utils.cw_calculator import CWCalculator
 
 
 class TCPAgent:
-    def __init__(self, trace_file: str, CWMAX: int=10, rtt_algorithm: str = "jacobson_rtt"):
+    def __init__(self, trace_file: str, CWMAX: int=10, rtt_algorithm: str = "jacobson_rtt", debug: bool = False):
         self.trace = read_trace_file(trace_file)
         self.cw_calculator = CWCalculator(CWMAX)
+        self.debug = debug
         
         # Load RTT algorithm
         if rtt_algorithm == "jacobson_rtt":
@@ -27,7 +28,7 @@ class TCPAgent:
         self.sent_segments = []
         
         # Results
-        self.results_file = "agent_results/results.tcp_rfc793"
+        self.results_file = "ex3/item1/agent_results/results.tcp_rfc793"
         self.results = []
        
         
@@ -65,6 +66,8 @@ class TCPAgent:
         if num_seq == self.rtt_seq and self.rtt_active == 1:
             # Compute RTT and timeout applying Jacobson/Karels algorithm
             rtt = current_time - self.rtt_begin_time
+            if self.debug:
+                print(f"{num_seq}")
             self.update_timeout(rtt)
             # Stop RTT timer
             self.rtt_active = 0
