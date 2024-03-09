@@ -8,10 +8,10 @@ agent_config = {
         "ns_results": "ns_simulations/rfc793/cw.tcp_rfc_ss",
     },
     "reno": { 
-        "trace_file": "../ns_simulations/reno/sor.tcp_reno_ss",
-        "computed_results": "timeouts.tcp_reno",
-        "ns_cw_results": "../ns_simulations/reno/cw.tcp_reno_ss",
-        "ns_rto_results": "../ns_simulations/reno/rto.tcp_reno_ss",
+        "trace_file": "ns_simulations/reno/sor.tcp_reno_ss",
+        "computed_results": "agent_results/results.tcp_reno",
+        "ns_cw_results": "ns_simulations/reno/cw.tcp_reno_ss",
+        "ns_rto_results": "ns_simulations/reno/rto.tcp_reno_ss",
     },
     "reno+red+wait_false": {
         "ns_cw_results": "../../item6/wait_false/cw.tcp_Reno_item6_ss",

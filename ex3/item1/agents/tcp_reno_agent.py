@@ -22,17 +22,19 @@ class TCPRenoAgent(TCPAgent):
         else:
             self.times_last_acked += 1
             
-        if self.times_last_acked == 4:
-            print(current_time)
+        if self.times_last_acked == 4 and not self.is_fast_recovery_phase():
             # Stop RTT timer
             self.rtt_active = 0
             self.restart_timeout_timer(current_time)
             # Update congestion window
-            self.update_cw(self.last_acked, timeout=False, duplicated=True)
+            self.update_cw(self.last_acked, timeout=False, duplicated=True, fast_recovery_sequence=self.sent_segments[-1])
             self.times_last_acked = 0
             
-    def update_cw(self, num_seq: int, timeout: bool, duplicated: bool = False):
-        self.cw_calculator.compute_cw(num_seq, timeout, duplicated)
+    def update_cw(self, num_seq: int, timeout: bool, duplicated: bool = False, fast_recovery_sequence: int = -1):
+        self.cw_calculator.compute_cw(num_seq, timeout, duplicated, fast_recovery_sequence=fast_recovery_sequence)
+        
+    def is_fast_recovery_phase(self):
+        return self.cw_calculator.fast_recovery_phase
         
     def process_timeout(self):
         super().process_timeout()

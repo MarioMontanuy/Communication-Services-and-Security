@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-import utils
+# import utils
 
 def read_trace_file(trace_file):
     with open(trace_file, "r") as file:
@@ -143,7 +143,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
         if event_type == '-' and segment_type == 'tcp' and source == '1' and destination == '2':           
             # Start RTT timer
             if rtt_active == 0 and int(num_seq) not in sent_segments:
-                print(f"{current_time}: Packet sent {num_seq}")
+                # print(f"{current_time}: Packet sent {num_seq}")
                 rtt_active = 1
                 rtt_seq = num_seq
                 rtt_begin_time = current_time
@@ -152,7 +152,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
 
         if event_type == 'r' and segment_type == 'ack' and source == '2' and destination == '1':
             if num_seq == rtt_seq and rtt_active == 1:
-                print(f"{num_seq}")
+                # print(f"{num_seq}")
                 # Compute RTT and timeout applying Jacobson/Karels algorithm
                 rtt_timer = current_time - rtt_begin_time
                 rtt_estimated, deviation, timeout = jacobson_karels_algorithm(rtt_timer, rtt_estimated, deviation)
@@ -160,6 +160,8 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
                 rtt_active = 0
                 # timeouts.append((current_time, cwnd, rtt_timer, timeout))
             
+            if current_time == 123.833835:
+                print(int(num_seq) not in acked_segments)
             if int(num_seq) not in acked_segments:
                 timeout_timer_begin_time = current_time
                 acked_segments.append(int(num_seq))
@@ -182,7 +184,8 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
             else:
                 times_last_acked += 1
 
-
+        if current_time == 125.792555:
+            print(timeout_timer_begin_time)
         if (current_time - timeout_timer_begin_time) > (timeout + 0.02):
             # Timeout occurred
             rtt_active = 0
@@ -193,7 +196,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
                 timeout = 2 * timeout
                 lost_segments.append(rtt_seq)
                 acked_segments = []
-            print(f"{current_time}:Timeout occured with sequence number {rtt_seq}")
+            # print(f"{current_time}:Timeout occured with sequence number {rtt_seq}")
                 
         if times_last_acked == 4 and not fast_recovery_phase:
             # print("Received 3rd duplicate ACK for sequence number", last_acked)
@@ -222,11 +225,14 @@ def write_results(timeouts, agent):
         
 
 if __name__ == "__main__":
-    args = utils.parse_args()
-    trace = read_trace_file(utils.get_agent_ns_trace(args.agent))
-    if args.agent == "tcp_rfc793":
-        timeouts = timeout_and_cw_computation(trace)
-    elif args.agent == "reno":
-        timeouts = timeout_and_cw_computation_reno(trace)
-    write_results(timeouts, args.agent)
+    # args = utils.parse_args()
+    # trace = read_trace_file(utils.get_agent_ns_trace(args.agent))
+    # if args.agent == "tcp_rfc793":
+    #     timeouts = timeout_and_cw_computation(trace)
+    # elif args.agent == "reno":
+    #     timeouts = timeout_and_cw_computation_reno(trace)
+    # write_results(timeouts, args.agent)
+    
+    trace = read_trace_file("../ns_simulations/reno/sor.tcp_reno_ss")
+    timeouts = timeout_and_cw_computation_reno(trace)
 

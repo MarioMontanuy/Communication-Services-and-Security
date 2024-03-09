@@ -93,6 +93,9 @@ class TCPAgent:
         return self.cw_calculator.is_already_acked(num_seq)
         
     def is_timeout(self, current_time: float):
+        if current_time == 125.792555:
+            print(self.timeout_timer)
+            print(f"Timeout: {current_time - self.timeout_timer} > {self.timeout + self.tolerance}")
         return (current_time - self.timeout_timer) > (self.timeout + self.tolerance)
     
     def write_results(self):
