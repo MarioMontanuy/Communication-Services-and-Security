@@ -3,9 +3,9 @@ from argparse import ArgumentParser
 
 agent_config = {
     "tcp_rfc793": {
-        "trace_file": "../ns_simulations/rfc793/sor.tcp_rfc_ss",
-        "computed_results": "timeouts.tcp_rfc793",
-        "ns_results": "../ns_simulations/rfc793/cw.tcp_rfc_ss",
+        "trace_file": "ns_simulations/rfc793/sor.tcp_rfc_ss",
+        "computed_results": "agent_results/results.tcp_rfc793",
+        "ns_results": "ns_simulations/rfc793/cw.tcp_rfc_ss",
     },
     "reno": { 
         "trace_file": "../ns_simulations/reno/sor.tcp_reno_ss",
@@ -29,7 +29,7 @@ agent_config = {
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument("agent", choices=agent_config.keys(), default="reno", nargs='?', help="Agent to plot results")
+    parser.add_argument("agent", choices=agent_config.keys(), default="tcp_rfc793", nargs='?', help="Agent to plot results")
     return parser.parse_args()
 
 def get_agent_ns_trace(agent):

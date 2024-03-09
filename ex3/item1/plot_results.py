@@ -15,7 +15,10 @@ def get_timeouts_and_cw(results):
     timeouts = []
     cw = []
     for line in results:
-        current_time, cw_value, rtt_timer, timeout = line.split(' ')
+        if len(line.split(' ')) == 3:
+            current_time, cw_value, timeout = line.split(' ')
+        elif len(line.split(' ')) == 4:
+            current_time, cw_value, _ , timeout = line.split(' ')
         timeouts.append((float(current_time), float(timeout)))
         cw.append((float(current_time), float(cw_value)))
     return timeouts, cw
