@@ -47,7 +47,13 @@ This will execute the script run_simulation.py with the reno agent in debug mode
 
 # ITEM 4
 
-TODO
+To compute the throughputs of the Reno and NewReno simulations, we can do so by using:
+````
+make get_reno_throughput
+````
+````
+make get_new_reno_throughput
+````
 
 # ITEM 5
 
@@ -58,7 +64,15 @@ make plot_new_reno_cwnd
 
 # ITEM 6
 
-TODO: explicar throughput?
+To compute the throughputs for the Reno agent with RED:
+- wait_ = true
+````
+make get_reno_wait_true_throughput
+````
+- wait_ = false
+````
+make get_reno_wait_false_throughput
+````
 
 In order to compare the congestion window of TCP reno with and without RED, we have generated a plot by running:
 ````
