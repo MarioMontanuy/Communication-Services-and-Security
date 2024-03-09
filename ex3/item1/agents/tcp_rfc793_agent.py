@@ -20,6 +20,11 @@ class TCPAgent:
         self.cwnd = 1
         self.tolerance = 0.02
         
+        # Auxiliary variables
+        self.rtt_active = 0
+        self.rtt_seq = -1
+        self.rtt_begin_time = 0
+        self.sent_segments = []
         
         # Results
         self.results_file = "agent_results/results.tcp_rfc793"
@@ -27,48 +32,54 @@ class TCPAgent:
        
         
     def compute_timeout_and_cw(self):
-        rtt_active = 0
-        rtt_seq = -1
-        rtt_begin_time = 0
-        sent_segments = []
-        
         for line in self.trace:
             event_type, current_time, source, destination, segment_type, num_seq = [line.split(' ')[0]] + [float(line.split(' ')[1])] + line.split(' ')[2:5] + [int(line.split(' ')[-2])]
             
             # Segment sent from TCP agent
             if is_segment_sent_from_tcp_agent(event_type, segment_type, source, destination):
-                # new segment is sent and rtt_active is 0
-                if rtt_active == 0 and num_seq not in sent_segments:
-                    rtt_active = 1
-                    rtt_seq = num_seq
-                    rtt_begin_time = current_time
-                # add to sent segments list
-                sent_segments.append(int(num_seq))
+                self.process_sent_segment(num_seq, current_time)
                     
             # Segment acknowledged from TCP agent
             if is_segment_acknowledged_from_tcp_agent(event_type, segment_type, source, destination):
-                if num_seq == rtt_seq and rtt_active == 1:
-                    # Compute RTT and timeout applying Jacobson/Karels algorithm
-                    rtt = current_time - rtt_begin_time
-                    self.update_timeout(rtt)
-                    # Stop RTT timer
-                    rtt_active = 0
-
-                # Update congestion window
-                if not self.is_acked_segment(num_seq):
-                    self.restart_timeout_timer(current_time)
-                    self.update_cw(num_seq, False)
+                self.process_acked_segment(num_seq, current_time)
                 
             # Timeout occurred
             if self.is_timeout(current_time):
-                rtt_active = 0
-                self.update_cw(rtt_seq, True)
+                self.process_timeout()
                 
             # Add line in result
             self.results.append((current_time, self.cw_calculator.cwnd, self.timeout))
-                
             
     
+    # METHODS TO PROCESS SEGMENTS
+    def process_sent_segment(self, num_seq: int, current_time: float):
+        # new segment is sent and rtt_active is 0
+        if self.rtt_active == 0 and num_seq not in self.sent_segments:
+            self.rtt_active = 1
+            self.rtt_seq = num_seq
+            self.rtt_begin_time = current_time
+        # add to sent segments list
+        self.sent_segments.append(int(num_seq))   
+        
+    def process_acked_segment(self, num_seq: int, current_time: float):
+        if num_seq == self.rtt_seq and self.rtt_active == 1:
+            # Compute RTT and timeout applying Jacobson/Karels algorithm
+            rtt = current_time - self.rtt_begin_time
+            self.update_timeout(rtt)
+            # Stop RTT timer
+            self.rtt_active = 0
+
+        # Update congestion window
+        if not self.is_acked_segment(num_seq):
+            self.restart_timeout_timer(current_time)
+            self.update_cw(num_seq, False)    
+                
+    def process_timeout(self):
+        self.rtt_active = 0
+        self.update_cw(self.rtt_seq, True)
+        
+        
+    # AUXILIARY METHODS
     def restart_timeout_timer(self, current_time: float):
         self.timeout_timer = current_time
         
