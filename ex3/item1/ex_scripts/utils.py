@@ -12,7 +12,19 @@ agent_config = {
         "computed_results": "timeouts.tcp_reno",
         "ns_cw_results": "../ns_simulations/reno/cw.tcp_reno_ss",
         "ns_rto_results": "../ns_simulations/reno/rto.tcp_reno_ss",
-    }
+    },
+    "reno+red+wait_false": {
+        "ns_cw_results": "../../item6/wait_false/cw.tcp_Reno_item6_ss",
+    },
+    "reno+red+wait_true": {
+        "ns_cw_results": "../../item6/wait_true/cw.tcp_Reno_item6_ss",
+    },
+    "newreno": {
+        "ns_cw_results": "../../item4/newreno/cw.tcp_Newreno_ss",
+    },
+    "reno_comparison": {
+        "ns_cw_results": "../../item5/cw.tcp_Reno_item5_ss",
+    },
 }
 
 def parse_args():

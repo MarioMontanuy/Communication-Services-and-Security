@@ -182,7 +182,7 @@ def timeout_and_cw_computation_reno(trace, CWMAX=10):
                 times_last_acked += 1
 
 
-        if (current_time - timeout_timer_begin_time) > (timeout + 0.015):
+        if (current_time - timeout_timer_begin_time) > (timeout + 0.02):
             # Timeout occurred
             rtt_active = 0
             fast_recovery_phase = False
