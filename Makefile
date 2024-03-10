@@ -52,6 +52,6 @@ plot_tcp_red_comparisons:
 run_wfq:
 	@echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	echo "Plotting TCP Reno and RED Comparisons"
-    	python ./ex2/WFQ.py -b $(B_ARG) -f $(FILE_ARG)
+    	python ./ex2/WFQ.py -b $(BANDWITH) -f $(FILE)
 
 all: run_tcp_rfc793 run_reno plot_reno_cwnd get_reno_rtt_seqs get_reno_throughput get_new_reno_throughput plot_new_reno_cwnd get_reno_wait_true_throughput get_reno_wait_false_throughput plot_tcp_red_comparisons run_wfq
