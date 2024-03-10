@@ -1,6 +1,12 @@
 # EXERCISE 1. COMMUNICATION SERVICES AND SECURITY
 
 # EXERCISE 2
+The folder ex2 stores the resolution of this section, followed by some test. 
+
+You can check the way to execute the script using the following command: 
+
+python3 ex2/WFQ.py -h
+
 
 # EXERCISE 3
 
