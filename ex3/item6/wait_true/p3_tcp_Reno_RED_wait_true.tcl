@@ -21,10 +21,15 @@ $ns trace-all $nf
 
 set nff [open $cwfile  w]
 
+# Open file out.nam in the variable nf
+set no [open out.nam w]
+# Tell the simulator to write all the relevan simulation data in this file
+$ns namtrace-all $no
+
 
 #Finishing procedure
 proc finish {} {
-    global ns nf nff tracefile cwfile trailer 
+    global ns nf nff tracefile cwfile trailer no 
     $ns flush-trace
     # Process "sor.tr" to get sent packets
     #exec awk {{ if ($1=="-" && $3==1 && $4=2) print $2, 49}}  $tracefile > tx$trailer
@@ -32,7 +37,9 @@ proc finish {} {
     #exec awk {{ if ($1=="d" && $3==2 && $4=3) print $2, 44}}  $tracefile  > drop$trailer
     #exec awk {{  print $2,$3}}  $tracefile  > out$trailer
     close $nf
+    close $no
     close $nff
+    exec nam out.nam &
     exit 0
 }
 
@@ -85,6 +92,11 @@ $red_queue set wait_ true
 $red_queue set limit_ 20
 # --------- Item 6 ----------
 
+# Make the topology look better in nam by positioning manually the nodes
+$ns duplex-link-op $n0 $n2 orient right-down
+$ns duplex-link-op $n1 $n2 orient right-up
+$ns duplex-link-op $n2 $n3 orient right
+
 # Set node 2 buffer size
 $ns queue-limit $n2 $n3 20
 
@@ -132,6 +144,14 @@ $ns attach-agent $n3 $null1
 
 # Connect node 1 to node 3
 $ns connect $tcp1 $null1 
+
+# Mark the flows
+$ns color 1 Blue
+$ns color 0 Red
+
+# After this we can see that the only the packets from n0-n2 are being discarded. This is because the DropTail queue isn't the most fair
+# Now we'll see how to look inside the link's queue to find out what is going inside
+$ns duplex-link-op $n2 $n3 queuePos 0.5
 
 # Stop simulation at  20 s.
 $ns at 200.0 "finish"
