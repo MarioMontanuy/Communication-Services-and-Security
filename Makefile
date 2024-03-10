@@ -50,6 +50,6 @@ plot_tcp_red_comparisons:
 	python ./ex3/item6/plot_tcp_red_comparisons.py
 
 run_wfq:
-    python3 WFQ.py -b $(B_ARG) -f $(FILE_ARG)
+    python3 ./ex2/WFQ.py -b $(B_ARG) -f $(FILE_ARG)
 
 all: run_tcp_rfc793 run_reno plot_reno_cwnd get_reno_rtt_seqs get_reno_throughput get_new_reno_throughput plot_new_reno_cwnd get_reno_wait_true_throughput get_reno_wait_false_throughput plot_tcp_red_comparisons run_wfq
