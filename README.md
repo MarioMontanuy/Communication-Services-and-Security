@@ -2,13 +2,13 @@
 
 # EXERCISE 2
 The folder ex2 stores the resolution of this section, followed by some test. You can check the way to execute the script using the following command: 
-
+````
 python ./ex2/WFQ.py -h
-
+````
 Example: 
-
+````
 python ./ex2/WFQ.py -b 50,30,20 -f ./ex2/test1.txt
-
+````
 # EXERCISE 3
 
 In the folder ex3 are contained all the python scripts used to complete this assignment. Below there is explained the folder structure along with how to run the different section.
